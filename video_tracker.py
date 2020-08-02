@@ -1,11 +1,13 @@
 import cv2
 
 #video we wanna use
-video_file = cv2.VideoCapture('Tesla Autopilot Dashcam Compilation 2018 Version.mp4')
+video_file = cv2.VideoCapture('Pedestrians Compilation.mp4')
 
-classifier_file = 'cars.xml'
+car_tracker_file = 'cars.xml'
+pedestrian_tracker_file = 'haarcascade_fullbody.xml'
 
-car_tracker = cv2.CascadeClassifier(classifier_file)
+car_tracker = cv2.CascadeClassifier(car_tracker_file)
+pedestrian_tracker = cv2.CascadeClassifier(pedestrian_tracker_file)
 
 #what a video is, is basically a bunch of pictures, we loop forever till video stops
 while True:
@@ -21,11 +23,23 @@ while True:
 
     #detect all of our grayscaled frame
     cars = car_tracker.detectMultiScale(grayscaled_frame)
+    pedestrians = pedestrian_tracker.detectMultiScale(grayscaled_frame)
 
     #same thing, draw rectangle on each car for each frame
     for (x, y, w, h) in cars:
+        cv2.rectangle(frame, (x+2, y+2), (x+w, y+h), (255, 0, 0), 2)    #just some extra styling
         cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255), 2)
 
-    cv2.imshow('Car Detector', frame)
-    #wait on each frame for 1ms
-    cv2.waitKey(1)
+    for (x, y, w, h) in pedestrians:
+        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+
+    cv2.imshow('Car & Pedestrian Detector', frame)
+    #wait on each frame for 1ms, further returns the key
+    key = cv2.waitKey(1)
+
+    #stop video if q is pressed (cuz it goes till video ends, otherwise u must have to break it thru terminal)
+    if key==81 or key==113:
+        break
+
+#release video capture, stop reading and just clean up
+video_file.release()
